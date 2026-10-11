@@ -5,11 +5,11 @@ the problem, the 19 methods I tried, what worked, what did not, and a scorer vul
 
 > **TL;DR**
 > - **Result:** 6,998,884 / 7,000,000 points, **42nd/176** in the standings. The top 42 teams were separated by **0.016 %**.
-> - **Instances 1 and 3 solved to proven optimality**; instances 2, 4, 5 and 7 within 0.001-0.008 % of the best
+> - **Instances 1 and 3 solved to proven optimality**, instances 2, 4, 5 and 7 within 0.001-0.008 % of the best
 >   score in the field. Almost the entire gap to the leader (966 of 1,116 points) is on a single instance.
 > - **Best ideas:** LP-guided initialisation, LNS with a *waste-penalised* acceptance rule, exact subset-sum packing,
 >   an exact "rematch" MIP, and a tabu search written in Rust (85-170k moves/s).
-> - **Key finding:** on data-starved instances, *choosing which models to train* is easy; *packing datasets into
+> - **Key finding:** on data-starved instances, *choosing which models to train* is easy, *packing datasets into
 >   requirement windows without waste* is the whole game.
 > - **Side quest:** the official scorer accepted negative indices, letting a model be counted twice. I proved it,
 >   reported it, did not use it, and the organisers fixed the scorer and recomputed the leaderboard.
@@ -26,7 +26,7 @@ the problem, the 19 methods I tried, what worked, what did not, and a scorer vul
 
 ## 2. The problem
 
-You run an AI lab with a fixed **energy budget**. You may train any subset of **models**; each model has a
+You run an AI lab with a fixed **energy budget**. You may train any subset of **models**, each model has a
 **value**, an **energy cost**, and **data requirements**: for each data type it needs (`n`, `t`, `i`, `c`), the total
 size of the datasets you give it must fall inside a window `[lowerBound, upperBound]`. Each **dataset** has a type,
 a size and a copyright flag, and can be given to at most one model.
@@ -45,15 +45,15 @@ maximise   Σ_m  value_m · (full_m + ½ · half_m)
 subject to Σ_m  energy_m · (full_m + half_m + gen_m)  ≤  energyCap
            for each trained model m and each required type t (not covered by a generator):
                lb_{m,t}  ≤  Σ_{d assigned to (m,t)} size_d  ≤  ub_{m,t}
-           each dataset used at most once; full-price models use non-copyrighted datasets only
-           each generator covers at most one requirement of one target; generators are not targets
+           each dataset used at most once, full-price models use non-copyrighted datasets only
+           each generator covers at most one requirement of one target, generators are not targets
 ```
 
 It is a mix of a **multi-dimensional knapsack** (which models, at which price), a **generalised assignment /
 bin-covering problem** (which datasets fill which window) and a **matching** (which generator feeds which target).
 
-Vocabulary used below: a **slot** is a (model, data type) pair to fill; a **packet** is the set of datasets assigned
-to a slot; **waste** is `Σ (packet size − lowerBound)` over slots filled with datasets.
+Vocabulary used below: a **slot** is a (model, data type) pair to fill, a **packet** is the set of datasets assigned
+to a slot, **waste** is `Σ (packet size − lowerBound)` over slots filled with datasets.
 
 ### The seven instances
 
@@ -62,9 +62,9 @@ to a slot; **waste** is `Σ (packet size − lowerBound)` over slots filled with
 | 1 | example | 5 | 5 | 0.61 | n/a | 60 % | solved by exhaustive search |
 | 2 | medium | 3,000 | 10,000 | 0.137 | ~0.35 | 66 % | energy and data both binding |
 | 3 | free | 5,000 | 20,000 | 0.126 | ~0.42 | 0 % | no copyright at all |
-| 4 | precise | 8,000 | 40,000 | 0.168 | ~0.50 | 50 % | no single-requirement model (no generators); very narrow windows |
-| 5 | energy | 11,000 | 100,000 | **1.087** | ~0.96 | 66 % | energy is not binding; only data matters |
-| 6 | shortage | 15,000 | **5,000** | 0.132 | **~0.04** | 41 % | extreme data shortage; generators are essential |
+| 4 | precise | 8,000 | 40,000 | 0.168 | ~0.50 | 50 % | no single-requirement model (no generators), very narrow windows |
+| 5 | energy | 11,000 | 100,000 | **1.087** | ~0.96 | 66 % | energy is not binding, only data matters |
+| 6 | shortage | 15,000 | **5,000** | 0.132 | **~0.04** | 41 % | extreme data shortage, generators are essential |
 | 7 | big | 50,000 | 250,000 | 0.172 | ~0.53 | 66 % | size |
 
 Every instance also contains requirements with `ub < lb`: these can only be satisfied by a generator.
@@ -117,13 +117,13 @@ Compared with the reference `starter.py` provided by the organisers:
 
 ![Progress on instance 6](assets/progress_instance6.png)
 
-*Instance 6 over the whole contest (left) and zoomed (right). Green bands: phases that produced gains; grey band:
+*Instance 6 over the whole contest (left) and zoomed (right). Green bands: phases that produced gains, grey band:
 six exact methods tried in parallel on Sunday, none of which improved the incumbent.*
 
 ![Ranking points lost per instance](assets/points_lost.png)
 
-*Ranking points lost against the final best score, per instance (log scale; instance 3 reaches 0, drawn at 0.5).
-About 95 % of the total gain came in the first two hours; the next 40 hours were spent on the last 0.1-0.5 %.*
+*Ranking points lost against the final best score, per instance (log scale, instance 3 reaches 0, drawn at 0.5).
+About 95 % of the total gain came in the first two hours, the next 40 hours were spent on the last 0.1-0.5 %.*
 
 ## 5. What worked, in chronological order
 
@@ -176,7 +176,7 @@ It then plateaued: +81 over a night on 52 cores.
 | Small CP-SAT repairs, CP-SAT by blocks | exact packing of 250-slot blocks | −37 % waste on sub-problems, no value gain | the `x[dataset, slot]` formulation is too symmetric |
 | Alternative role "basins" | restart from other MIP roles | started 1,400-8,000 points lower | hours to climb back, never caught up |
 | Path relinking | walk between elite solutions | 0 in 14 pairs | the elite solutions lie on the same plateau |
-| Column generation | price new packets with LP duals | +2 per iteration, LP > 300 s | highly degenerate master; value sits in the slot rows, datasets have zero duals |
+| Column generation | price new packets with LP duals | +2 per iteration, LP > 300 s | highly degenerate master, value sits in the slot rows, datasets have zero duals |
 | "Effective supply" loop | role MIP with reduced supply to anticipate waste | 1,400 below best | greedy realisation wasted twice as much |
 | Exact packets with fixed roles (m2) | set partitioning over tight subsets | +100/h on loose solutions, 0 on best | LP margin of 0.03 % on a polished solution |
 | Targeted CP-SAT (m4) | re-solve the 275 high-excess slots | "feasible, no gain" in 19 rounds | same symmetry issue |
@@ -234,10 +234,10 @@ computation turned "these teams are very good" into "these scores are impossible
 
 ## 9. Engineering lessons
 
-- **HiGHS:** crashed beyond ~1M columns; dual simplex was very slow on degenerate LPs (572 s for 173k columns) while
-  the IPM was 3-5× faster but is not used inside the MIP; `scipy.milp` cannot take a starting solution, which made it
-  unusable on large models; thread count cannot be set through scipy (pin processes with `taskset`).
-- **CP-SAT:** with an `x[dataset, slot]` formulation it proved nothing even on 17 × 27 sub-problems; useful only with
+- **HiGHS:** crashed beyond ~1M columns, dual simplex was very slow on degenerate LPs (572 s for 173k columns) while
+  the IPM was 3-5× faster but is not used inside the MIP, `scipy.milp` cannot take a starting solution, which made it
+  unusable on large models, thread count cannot be set through scipy (pin processes with `taskset`).
+- **CP-SAT:** with an `x[dataset, slot]` formulation it proved nothing even on 17 × 27 sub-problems, useful only with
   a full hint and a small neighbourhood.
 - **`highspy` and `ortools` cannot be imported in the same Python process** (symbol conflict): use sub-processes.
 - **`pkill -f pattern` kills its own calling shell** when the pattern appears in its command line: anchor with `^`.
@@ -249,7 +249,7 @@ computation turned "these teams are very good" into "these scores are impossible
 
 ## 10. What I would do differently
 
-1. **Measure waste from hour one.** It was the real objective on four of the seven instances; I made it explicit only
+1. **Measure waste from hour one.** It was the real objective on four of the seven instances, I made it explicit only
    on Friday night and fully understood it on Saturday afternoon.
 2. **Write the inner loops in Rust from the start.** The Python LNS ran at ~1 iteration/s on instance 7 and ~10/s on
    instance 6, while the Rust tabu evaluated 85-170k moves per second.
@@ -258,8 +258,8 @@ computation turned "these teams are very good" into "these scores are impossible
 4. **Spend less compute on exact global models.** About 400 core-hours of exact methods produced a valuable diagnosis
    but no points.
 5. **Unexplored leads**, in order of expected value: a global per-type repacking with very tight columns
-   (`sum ∈ [lb, lb + 5]`) followed by half-to-full switches; column generation priced per *model* with proper dual
-   stabilisation; a tabu objective aimed at freeing exactly the dataset sizes that the two switch candidates need.
+   (`sum ∈ [lb, lb + 5]`) followed by half-to-full switches, column generation priced per *model* with proper dual
+   stabilisation, a tabu objective aimed at freeing exactly the dataset sizes that the two switch candidates need.
 
 ## 11. Repository layout
 
