@@ -1,0 +1,37 @@
+{
+  "1": {
+    "date": "2026-10-09 18:18:56",
+    "method": "exemple fourni (optimum prouv\u00e9)",
+    "score": 12946
+  },
+  "2": {
+    "date": "2026-10-10 01:15:21",
+    "method": "lns seed=2001 b=1.000 gamma=1.00",
+    "score": 272299
+  },
+  "3": {
+    "date": "2026-10-10 12:27:06",
+    "method": "fin MIP r\u00f4les HiGHS 30s optimal + fin_realize",
+    "score": 523758
+  },
+  "4": {
+    "date": "2026-10-10 13:48:10",
+    "method": "lns seed=4402 b=1.000 gamma=1.00",
+    "score": 1031937
+  },
+  "5": {
+    "date": "2026-10-10 20:26:29",
+    "method": "cloud cloud-host",
+    "score": 3785933
+  },
+  "6": {
+    "date": "2026-10-11 08:56:05",
+    "method": "cloud cloud-host",
+    "score": 669156
+  },
+  "7": {
+    "date": "2026-10-10 17:32:00",
+    "method": "lns seed=7401 b=1.000 gamma=1.00",
+    "score": 5822483
+  }
+}
