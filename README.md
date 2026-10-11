@@ -75,7 +75,7 @@ Every instance also contains requirements with `ub < lb`: these can only be sati
 | component | details |
 |---|---|
 | Home server | Proxmox VE on a Ryzen 7 5800X3D, one Ubuntu 24.04 VM with 14 vCPUs and 23 GB RAM |
-| Cloud | AWS `c7i.12xlarge` (48 vCPUs, Paris), on-demand, ~26 hours on Saturday and Sunday |
+| Cloud | AWS `c7i.12xlarge` (48 vCPUs, Paris), on-demand |
 | Languages | Python (NumPy, Numba) for most of the code, Rust for the tabu search |
 | Solvers | HiGHS (via `highspy` and `scipy`), Google OR-Tools CP-SAT |
 | Development | Claude Code (Anthropic), first as a pair programmer, then as an orchestrator of parallel sub-agents, each testing one method in its own files |
