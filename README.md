@@ -4,8 +4,7 @@
 the problem, the 19 methods I tried, what worked, what did not, and a scorer vulnerability found along the way.*
 
 > **TL;DR**
-> - **Result:** 6,998,884 / 7,000,000 points, **42nd** in the standings at 21:15 CEST on Sunday (provisional,
->   before the 23:59 close). The top 42 teams were separated by **0.016 %**.
+> - **Result:** 6,998,884 / 7,000,000 points, **42nd/176** in the standings. The top 42 teams were separated by **0.016 %**.
 > - **Instances 1 and 3 solved to proven optimality**; instances 2, 4, 5 and 7 within 0.001-0.008 % of the best
 >   score in the field. Almost the entire gap to the leader (966 of 1,116 points) is on a single instance.
 > - **Best ideas:** LP-guided initialisation, LNS with a *waste-penalised* acceptance rule, exact subset-sum packing,
